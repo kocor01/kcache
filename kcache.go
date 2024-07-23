@@ -27,8 +27,8 @@ type entry struct {
 type GetKcDatafunc func() KcData
 
 type KcData struct {
-	d   interface{}
-	err error
+	Data interface{}
+	Err  error
 }
 
 // New 创建一个KCache, 默认本地缓存过期时间 5s
@@ -121,18 +121,18 @@ func (kc *KCache) GetWithExp(k string, t time.Duration, fc GetKcDatafunc) KcData
 
 // Set 设置本地缓存
 // k 缓存KEY
-// d 缓存数据
+// Data 缓存数据
 func (kc *KCache) Set(k string, d interface{}) {
-	kcd := KcData{d: d, err: nil}
+	kcd := KcData{Data: d, Err: nil}
 	kc.lc.Set(k, kcd, kc.lcExp)
 }
 
 // SetWithExp 设置本地缓存,自定义本地缓存时间
 // k 缓存KEY
-// d 缓存数据
+// Data 缓存数据
 // t 本地缓存时间
 func (kc *KCache) SetWithExp(k string, t time.Duration, d interface{}) {
-	kcd := KcData{d: d, err: nil}
+	kcd := KcData{Data: d, Err: nil}
 	kc.lc.Set(k, kcd, t)
 }
 

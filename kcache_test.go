@@ -12,11 +12,11 @@ import (
 func TestKCacheNew(t *testing.T) {
 	kc := New()
 	d := kc.Get("myKey", GetData())
-	if d.err != nil {
-		t.Error("get key err:", d.err)
+	if d.Err != nil {
+		t.Error("get key Err:", d.Err)
 		return
 	}
-	data := d.d.(map[string]string)
+	data := d.Data.(map[string]string)
 	t.Log("key found", data)
 	fmt.Println("finish")
 }
@@ -25,11 +25,11 @@ func TestKCacheNew(t *testing.T) {
 func TestKCacheNewWithExp(t *testing.T) {
 	kc := NewWithExp(2 * time.Second)
 	d := kc.Get("myKey", GetData())
-	if d.err != nil {
-		t.Error("get key err:", d.err)
+	if d.Err != nil {
+		t.Error("get key Err:", d.Err)
 		return
 	}
-	data := d.d.(map[string]string)
+	data := d.Data.(map[string]string)
 	t.Log("key found", data)
 	fmt.Println("finish")
 }
@@ -38,11 +38,11 @@ func TestKCacheNewWithExp(t *testing.T) {
 func TestKCacheSingleGet(t *testing.T) {
 	kc := New()
 	d := kc.Get("myKey", GetData())
-	if d.err != nil {
-		t.Error("get key err:", d.err)
+	if d.Err != nil {
+		t.Error("get key Err:", d.Err)
 		return
 	}
-	data := d.d.(map[string]string)
+	data := d.Data.(map[string]string)
 	t.Log("key found", data)
 	fmt.Println("finish")
 }
@@ -55,8 +55,8 @@ func TestKCacheGet(t *testing.T) {
 		"k2": "value2",
 	}
 	d := kc.Get("myKey", GetDataV2("myKey", params))
-	if d.err != nil {
-		t.Error("get key err:", d.err)
+	if d.Err != nil {
+		t.Error("get key Err:", d.Err)
 		return
 	}
 	t.Log("key found", d)
@@ -72,8 +72,8 @@ func TestKCacheGetWithExp(t *testing.T) {
 		"k2": "value2",
 	}
 	d := kc.GetWithExp("myKey", exp, GetDataV2("myKey", params))
-	if d.err != nil {
-		t.Error("get key err:", d.err)
+	if d.Err != nil {
+		t.Error("get key Err:", d.Err)
 		return
 	}
 	t.Log("key found", d)
@@ -149,8 +149,8 @@ func TestKCacheConcurrency(t *testing.T) {
 					"k2": "value2",
 				}
 				d := kc.Get(key, GetDataV2(key, params))
-				if d.err != nil {
-					t.Error("get key err:", d.err)
+				if d.Err != nil {
+					t.Error("get key Err:", d.Err)
 					return
 				}
 			}(j)
@@ -187,8 +187,8 @@ func TestKCacheContinuousConcurrency(t *testing.T) {
 								"k2": "value2",
 							}
 							d := kc.Get(key, GetDataV2(key, params))
-							if d.err != nil {
-								t.Error("get key err:", d.err)
+							if d.Err != nil {
+								t.Error("get key Err:", d.Err)
 								return
 							}
 						}(j)
@@ -217,7 +217,7 @@ func GetData() GetKcDatafunc {
 			"k1": "value1",
 			"k2": "value2",
 		}
-		return KcData{d: d, err: nil}
+		return KcData{Data: d, Err: nil}
 	}
 }
 
@@ -230,6 +230,6 @@ func GetDataV2(key string, params map[string]string) GetKcDatafunc {
 		for k, v := range params {
 			data[k+key] = v
 		}
-		return KcData{d: data, err: nil}
+		return KcData{Data: data, Err: nil}
 	}
 }
