@@ -34,7 +34,7 @@ type KcData struct {
 // New 创建一个KCache, 默认本地缓存过期时间 5s
 func New() *KCache {
 	return &KCache{
-		lc:     cache.New(DefaultLcExp, DefaultLcExp+time.Second*10),
+		lc:     cache.New(DefaultLcExp, time.Second*10),
 		mu:     sync.RWMutex{},
 		lcExp:  DefaultLcExp,
 		entrys: map[string]*entry{},
