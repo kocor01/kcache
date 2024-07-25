@@ -93,7 +93,9 @@ go 本地缓存解决方案，支持本地缓存过期、缓存过期自维护�
   ```
 
 ### GetKcDatafunc 实现
-- Kcache函数（推荐）
+- Kcache 中间函数（强烈推荐）
+  
+  通过 Kcache 中间函数调用原有的获取数据函数，该函数内部不含任何业务代码，减少业务代码与缓存代码的耦合。
   ```
   kc := New()
   exp := 2 * time.Second
@@ -101,12 +103,11 @@ go 本地缓存解决方案，支持本地缓存过期、缓存过期自维护�
     "k1": "value1",
     "k2": "value2",
   }
-  d := kc.GetWithExp("myKey", exp, GetDataKcacheV2("myKey", params))
-  ```
+  d := kc.GetWithExp("myKey", exp, GetDataKcache("myKey", params))
   ```
 
-// 获取缓存数据, Kcache
   ```
+  // 获取缓存数据, Kcache 中间函数
   func GetDataKcache(key string, params map[string]string) GetKcDatafunc {
     return func() KcData {
       data, err := GetDataV2(key, params)
@@ -127,6 +128,8 @@ go 本地缓存解决方案，支持本地缓存过期、缓存过期自维护�
   ```
 
 - 闭包函数（推荐）
+
+  简单获取数据的业务逻辑可以使用闭包函数。
   ```
   kc := New()
   params := map[string]string{

@@ -231,7 +231,7 @@ func GetData() GetKcDatafunc {
 	}
 }
 
-// 获取缓存数据, Kcache
+// 获取缓存数据, Kcache 中间函数
 func GetDataKcache(key string, params map[string]string) GetKcDatafunc {
 	return func() KcData {
 		data, err := GetDataV2(key, params)
