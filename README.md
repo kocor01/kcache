@@ -37,7 +37,7 @@ go 本地缓存解决方案，支持本地缓存过期、缓存过期自维护�
   
   示例：
   ```
-  // 获取缓存数据函数
+  // 获取缓存数据
   func GetData() GetKcDatafunc {
     return func() KcData {
       // sleep 模拟从 Redis、DB 中获取数据
@@ -65,7 +65,7 @@ go 本地缓存解决方案，支持本地缓存过期、缓存过期自维护�
   
   示例：
   ```
-  // 获取缓存数据函数
+  // 获取缓存数据
   func GetDataV2(key string, params map[string]string) GetKcDatafunc {
     return func() KcData {
       // sleep 模拟从 Redis、DB 中获取数据，也可以先从 redis 获取数据, 如果获取不到，再从 DB 中获取。
@@ -92,6 +92,79 @@ go 本地缓存解决方案，支持本地缓存过期、缓存过期自维护�
   d := kc.GetWithExp("myKey", exp, GetDataV2("myKey", params))
   ```
 
+### GetKcDatafunc 实现
+- Kcache函数（推荐）
+  ```
+  kc := New()
+  exp := 2 * time.Second
+  params := map[string]string{
+    "k1": "value1",
+    "k2": "value2",
+  }
+  d := kc.GetWithExp("myKey", exp, GetDataKcacheV2("myKey", params))
+  ```
+  ```
+
+// 获取缓存数据, Kcache
+  ```
+  func GetDataKcache(key string, params map[string]string) GetKcDatafunc {
+    return func() KcData {
+      data, err := GetDataV2(key, params)
+      return KcData{Data: data, Err: err}
+    }
+  }
+  
+  // 获取数据
+  func GetDataV2(key string, params map[string]string) (map[string]string, error) {
+    // sleep 模拟从 Redis、DB 中获取数据，也可以先从 redis 获取数据, 如果获取不到，再从 DB 中获取。
+    time.Sleep(20 * time.Millisecond)
+    data := make(map[string]string)
+      for k, v := range params {
+      data[k+key] = v
+    }
+    return data, nil
+  }
+  ```
+
+- 闭包函数（推荐）
+  ```
+  kc := New()
+  params := map[string]string{
+    "k1": "value1",
+    "k2": "value2",
+  }
+  key := "myKey"
+  fc := func() KcData {
+    // sleep 模拟从 Redis、DB 中获取数据，也可以先从 redis 获取数据, 如果获取不到，再从 DB 中获取。
+    time.Sleep(20 * time.Millisecond)
+    data := make(map[string]string)
+    for k, v := range params {
+        data[k+key] = v
+    }
+    return KcData{Data: data, Err: nil}
+  }
+  d := kc.Get(key, fc)
+  ```
+
+- 业务混合
+  ```
+  kc := New()
+  d := kc.Get("myKey", GetData())
+  ```
+  ```
+  // 获取缓存数据
+  func GetData() GetKcDatafunc {
+    return func() KcData {
+      // sleep 模拟从 Redis、DB 中获取数据
+      time.Sleep(20 * time.Millisecond)
+      d := map[string]string{
+        "k1": "value1",
+        "k2": "value2",
+      }
+      return KcData{Data: d, Err: nil}
+    }
+  }
+  ```
 ### 设置缓存
 - Set 设置缓存，本地缓存过期时间为创建 KCache 时设置的全局过期时间。
 

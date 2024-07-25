@@ -54,7 +54,17 @@ func TestKCacheGet(t *testing.T) {
 		"k1": "value1",
 		"k2": "value2",
 	}
-	d := kc.Get("myKey", GetDataV2("myKey", params))
+	key := "myKey"
+	fc := func() KcData {
+		// sleep 模拟从 Redis、DB 中获取数据，也可以先从 redis 获取数据, 如果获取不到，再从 DB 中获取。
+		time.Sleep(20 * time.Millisecond)
+		data := make(map[string]string)
+		for k, v := range params {
+			data[k+key] = v
+		}
+		return KcData{Data: data, Err: nil}
+	}
+	d := kc.Get(key, fc)
 	if d.Err != nil {
 		t.Error("get key Err:", d.Err)
 		return
@@ -71,7 +81,7 @@ func TestKCacheGetWithExp(t *testing.T) {
 		"k1": "value1",
 		"k2": "value2",
 	}
-	d := kc.GetWithExp("myKey", exp, GetDataV2("myKey", params))
+	d := kc.GetWithExp("myKey", exp, GetDataKcache("myKey", params))
 	if d.Err != nil {
 		t.Error("get key Err:", d.Err)
 		return
@@ -148,7 +158,7 @@ func TestKCacheConcurrency(t *testing.T) {
 					"k1": "value1",
 					"k2": "value2",
 				}
-				d := kc.Get(key, GetDataV2(key, params))
+				d := kc.Get(key, GetDataKcache(key, params))
 				if d.Err != nil {
 					t.Error("get key Err:", d.Err)
 					return
@@ -186,7 +196,7 @@ func TestKCacheContinuousConcurrency(t *testing.T) {
 								"k1": "value1",
 								"k2": "value2",
 							}
-							d := kc.Get(key, GetDataV2(key, params))
+							d := kc.Get(key, GetDataKcache(key, params))
 							if d.Err != nil {
 								t.Error("get key Err:", d.Err)
 								return
@@ -208,7 +218,7 @@ func TestKCacheContinuousConcurrency(t *testing.T) {
 	fmt.Println("finish")
 }
 
-// 获取缓存数据函数
+// 获取缓存数据
 func GetData() GetKcDatafunc {
 	return func() KcData {
 		// sleep 模拟从 Redis、DB 中获取数据
@@ -221,15 +231,21 @@ func GetData() GetKcDatafunc {
 	}
 }
 
-// 获取缓存数据函数, 带参数
-func GetDataV2(key string, params map[string]string) GetKcDatafunc {
+// 获取缓存数据, Kcache
+func GetDataKcache(key string, params map[string]string) GetKcDatafunc {
 	return func() KcData {
-		// sleep 模拟从 Redis、DB 中获取数据，也可以先从 redis 获取数据, 如果获取不到，再从 DB 中获取。
-		time.Sleep(20 * time.Millisecond)
-		data := make(map[string]string)
-		for k, v := range params {
-			data[k+key] = v
-		}
-		return KcData{Data: data, Err: nil}
+		data, err := GetDataV2(key, params)
+		return KcData{Data: data, Err: err}
 	}
+}
+
+// 获取数据
+func GetDataV2(key string, params map[string]string) (map[string]string, error) {
+	// sleep 模拟从 Redis、DB 中获取数据，也可以先从 redis 获取数据, 如果获取不到，再从 DB 中获取。
+	time.Sleep(20 * time.Millisecond)
+	data := make(map[string]string)
+	for k, v := range params {
+		data[k+key] = v
+	}
+	return data, nil
 }
