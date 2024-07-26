@@ -85,6 +85,24 @@ func (kc *KCache) Get(k string, fc GetKcDatafunc) KcData {
 	return d.(KcData)
 }
 
+// GetWithCtx 获取缓存, 支持上下文
+// k 缓存KEY
+// fc 本地缓存不存在时，获取缓存数据函数
+func (kc *KCache) GetWithCtx(k string, fc GetKcDatafunc) KcData {
+	d, f := kc.lc.Get(k)
+	if !f {
+		kc.mu.Lock()
+		defer kc.mu.Unlock()
+		d, f = kc.lc.Get(k)
+		if !f {
+			d = fc()
+			kc.lc.Set(k, d, kc.lcExp)
+		}
+	}
+
+	return d.(KcData)
+}
+
 // GetWithExp 获取缓存，自定义本地缓存时间
 // k 缓存KEY
 // t 自定义本地缓存时间
@@ -112,6 +130,25 @@ func (kc *KCache) GetWithExp(k string, t time.Duration, fc GetKcDatafunc) KcData
 		d, f = kc.lc.Get(k)
 		if !f {
 			d = e.fc()
+			kc.lc.Set(k, d, t)
+		}
+	}
+
+	return d.(KcData)
+}
+
+// GetWithCtx 获取缓存, 支持上下文
+// k 缓存KEY
+// t 自定义本地缓存时间
+// fc 本地缓存不存在时，获取缓存数据函数
+func (kc *KCache) GetWithExpCtx(k string, t time.Duration, fc GetKcDatafunc) KcData {
+	d, f := kc.lc.Get(k)
+	if !f {
+		kc.mu.Lock()
+		defer kc.mu.Unlock()
+		d, f = kc.lc.Get(k)
+		if !f {
+			d = fc()
 			kc.lc.Set(k, d, t)
 		}
 	}

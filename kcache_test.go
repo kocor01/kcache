@@ -196,7 +196,7 @@ func TestKCacheContinuousConcurrency(t *testing.T) {
 								"k1": "value1",
 								"k2": "value2",
 							}
-							d := kc.Get(key, GetDataKcache(key, params))
+							d := kc.GetWithExpCtx(key, 1*time.Second, GetDataKcache(key, params))
 							if d.Err != nil {
 								t.Error("get key Err:", d.Err)
 								return
