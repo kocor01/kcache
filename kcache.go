@@ -63,39 +63,22 @@ func (kc *KCache) Get(k string, fc GetKcDatafunc) KcData {
 		kc.mu.Lock()
 		e = kc.entrys[k]
 		if e == nil {
-			e = &entry{fc: fc, mu: sync.RWMutex{}}
+			e = &entry{mu: sync.RWMutex{}}
 			kc.entrys[k] = e
-		} else {
-			e = kc.entrys[k]
 		}
 		kc.mu.Unlock()
 	}
+	// 更新获取缓存函数，支持上下文。
+	e.fc = fc
 
 	d, f := kc.lc.Get(k)
 	if !f {
+		// 加锁，防止并发请求函数
 		e.mu.Lock()
 		defer e.mu.Unlock()
 		d, f = kc.lc.Get(k)
 		if !f {
 			d = e.fc()
-			kc.lc.Set(k, d, kc.lcExp)
-		}
-	}
-
-	return d.(KcData)
-}
-
-// GetWithCtx 获取缓存, 支持上下文
-// k 缓存KEY
-// fc 本地缓存不存在时，获取缓存数据函数
-func (kc *KCache) GetWithCtx(k string, fc GetKcDatafunc) KcData {
-	d, f := kc.lc.Get(k)
-	if !f {
-		kc.mu.Lock()
-		defer kc.mu.Unlock()
-		d, f = kc.lc.Get(k)
-		if !f {
-			d = fc()
 			kc.lc.Set(k, d, kc.lcExp)
 		}
 	}
@@ -115,40 +98,22 @@ func (kc *KCache) GetWithExp(k string, t time.Duration, fc GetKcDatafunc) KcData
 		kc.mu.Lock()
 		e = kc.entrys[k]
 		if e == nil {
-			e = &entry{fc: fc, mu: sync.RWMutex{}}
+			e = &entry{mu: sync.RWMutex{}}
 			kc.entrys[k] = e
-		} else {
-			e = kc.entrys[k]
 		}
 		kc.mu.Unlock()
 	}
+	// 更新获取缓存函数，支持上下文。
+	e.fc = fc
 
 	d, f := kc.lc.Get(k)
 	if !f {
+		// 加锁，防止并发请求函数
 		e.mu.Lock()
 		defer e.mu.Unlock()
 		d, f = kc.lc.Get(k)
 		if !f {
 			d = e.fc()
-			kc.lc.Set(k, d, t)
-		}
-	}
-
-	return d.(KcData)
-}
-
-// GetWithCtx 获取缓存, 支持上下文
-// k 缓存KEY
-// t 自定义本地缓存时间
-// fc 本地缓存不存在时，获取缓存数据函数
-func (kc *KCache) GetWithExpCtx(k string, t time.Duration, fc GetKcDatafunc) KcData {
-	d, f := kc.lc.Get(k)
-	if !f {
-		kc.mu.Lock()
-		defer kc.mu.Unlock()
-		d, f = kc.lc.Get(k)
-		if !f {
-			d = fc()
 			kc.lc.Set(k, d, t)
 		}
 	}
