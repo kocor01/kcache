@@ -129,9 +129,9 @@ func TestKCacheDelete(t *testing.T) {
 func TestKCacheLocalCacke(t *testing.T) {
 	kc := New()
 	// SET
-	kc.lc.Set("myKey", "myValue", 2*time.Second)
+	kc.Lcache().Set("myKey", "myValue", 2*time.Second)
 	// GET
-	d, f := kc.lc.Get("myKey")
+	d, f := kc.Lcache().Get("myKey")
 	if !f {
 		t.Error("get key not found:")
 		return

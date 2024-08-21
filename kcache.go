@@ -143,3 +143,8 @@ func (kc *KCache) SetWithExp(k string, t time.Duration, d interface{}) {
 func (kc *KCache) Delete(k string) {
 	kc.lc.Delete(k)
 }
+
+// Lcache 获取本地缓存对象
+func (kc *KCache) Lcache() *cache.Cache {
+	return kc.lc
+}
